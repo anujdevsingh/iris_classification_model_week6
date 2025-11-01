@@ -34,14 +34,14 @@ def health():
 def ready():
     return {"model_loaded": model is not None}
 
-@app.post("/predict")
-def predict(x: IrisInput):
-    arr = np.array([[x.sepal_length, x.sepal_width, x.petal_length, x.petal_width]])
+@app.get("/predict")
+def predict(
+    sepal_length: float,
+    sepal_width: float,
+    petal_length: float,
+    petal_width: float
+):
+    arr = np.array([[sepal_length, sepal_width, petal_length, petal_width]])
     pred = model.predict(arr).tolist()[0]
-    # try proba if available
-    proba = None
-    try:
-        proba = model.predict_proba(arr).tolist()[0]
-    except Exception:
-        pass
-    return {"prediction": pred, "proba": proba}
+    return {"prediction": pred}
+
