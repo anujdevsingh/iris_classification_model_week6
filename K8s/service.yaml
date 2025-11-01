@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: iris-api-svc
+  labels: { app: iris-api }
+spec:
+  selector: { app: iris-api }
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iris-api
+  labels: { app: iris-api }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: iris-api }
+  template:
+    metadata:
+      labels: { app: iris-api }
+    spec:
+      containers:
+        - name: iris-api
+          # 👇 GitHub Actions will overwrite this image tag on deploy
+          image: us-central1-docker.pkg.dev/PROJECT_ID/iris-ml/iris-api:dev
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MLFLOW_TRACKING_URI
+              valueFrom:
+                secretKeyRef:
+                  name: iris-secrets
+                  key: MLFLOW_TRACKING_URI
+            - name: MLFLOW_MODEL_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: iris-secrets
+                  key: MLFLOW_MODEL_NAME
+            - name: MLFLOW_MODEL_STAGE
+              valueFrom:
+                secretKeyRef:
+                  name: iris-secrets
+                  key: MLFLOW_MODEL_STAGE
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: iris-secrets
+type: Opaque
+stringData:
+  # You can also create this Secret from kubectl in the CI (shown later)
+  MLFLOW_TRACKING_URI: "http://MLFLOW_HOST:8100"
+  MLFLOW_MODEL_NAME: "iris_classifier"
+  MLFLOW_MODEL_STAGE: "Production"
